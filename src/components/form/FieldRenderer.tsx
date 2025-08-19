@@ -14,26 +14,29 @@ import {
 
 interface Props {
   field: FieldSchema;
+  className?: string;
 }
 
-export function FieldRenderer({ field }: Props) {
+export function FieldRenderer({ field, className }: Props) {
   const form = useFormContext();
   const { visibleFields, enabledFields } = useFormStore();
   if (!visibleFields[field.id]) return null;
   const disabled = !enabledFields[field.id];
 
   return (
-    <FormField
-      control={form.control}
-      name={field.id}
-      render={({ field: rf }) => (
-        <FormItem>
-          <FormLabel>{field.label}</FormLabel>
-          <FormControl>{renderField(rf)}</FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <div className={className}>
+      <FormField
+        control={form.control}
+        name={field.id}
+        render={({ field: rf }) => (
+          <FormItem>
+            <FormLabel>{field.label}</FormLabel>
+            <FormControl>{renderField(rf)}</FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
   );
 
   function renderField(rf: any) {

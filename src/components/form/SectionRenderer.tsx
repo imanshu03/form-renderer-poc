@@ -10,11 +10,18 @@ export function SectionRenderer({ section }: Props) {
   const { visibleSections, enabledSections } = useFormStore();
   if (!visibleSections[section.id]) return null;
   const disabled = !enabledSections[section.id];
+  const columns = section.layout?.columns ?? 1;
   return (
-    <div className={disabled ? 'opacity-50 pointer-events-none space-y-4' : 'space-y-4'}>
-      {section.fields.map((f) => (
-        <FieldRenderer key={f.id} field={f} />
-      ))}
+    <div className={disabled ? 'opacity-50 pointer-events-none' : ''}>
+      <div className={`grid grid-cols-${columns} gap-4`}>
+        {section.fields.map((f) => (
+          <FieldRenderer
+            key={f.id}
+            field={f}
+            className={`col-span-${f.span ?? 1}`}
+          />
+        ))}
+      </div>
     </div>
   );
 }

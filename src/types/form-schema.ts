@@ -9,6 +9,7 @@ export interface SectionSchema {
   enabled?: boolean;
   fields: FieldSchema[];
   rules?: RuleSchema[];
+  layout?: { columns: number };
 }
 
 export interface FieldSchema {
@@ -21,6 +22,7 @@ export interface FieldSchema {
   visible?: boolean;
   enabled?: boolean;
   rules?: RuleSchema[];
+  span?: number;
 }
 
 export interface OptionSchema {
