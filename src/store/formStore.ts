@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { FormSchema } from '@/types/form-schema';
+import { FormSchema, SectionSchema, FieldSchema } from '@/types/form-schema';
 import { resolvePlaceholders } from '@/lib/placeholder';
 
 interface FormState {
@@ -38,6 +38,14 @@ export const useFormStore = create<FormState>()(
       try {
         const raw = JSON.parse(get().schemaText);
         const schema = resolvePlaceholders(raw, get().contextValues);
+        schema.sections = schema.sections.map((s: SectionSchema) => ({
+          ...s,
+          layout: { columns: s.layout?.columns ?? 1 },
+          fields: s.fields.map((f: FieldSchema) => ({
+            ...f,
+            span: f.span ?? 1,
+          })),
+        }));
         const visibleSections: Record<string, boolean> = {};
         const enabledSections: Record<string, boolean> = {};
         const visibleFields: Record<string, boolean> = {};
