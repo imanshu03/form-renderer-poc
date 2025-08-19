@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { useFormStore } from '@/store/formStore';
 import { SectionRenderer } from './SectionRenderer';
@@ -69,6 +69,45 @@ export function FormRenderer() {
 
   const currentSection = schema.sections[currentSectionIndex];
 
+  const visibleSectionIndices = useMemo(
+    () =>
+      schema.sections
+        .map((sec, idx) => ({ sec, idx }))
+        .filter(({ sec }) => visibleSections[sec.id]),
+    [schema, visibleSections]
+  );
+
+  const currentVisibleIndex = visibleSectionIndices.findIndex(
+    ({ idx }) => idx === currentSectionIndex
+  );
+
+  const isFirstSection = currentVisibleIndex === 0;
+  const isLastSection =
+    currentVisibleIndex === visibleSectionIndices.length - 1;
+
+  const nextSectionIndex = visibleSectionIndices[currentVisibleIndex + 1]?.idx;
+  const prevSectionIndex = visibleSectionIndices[currentVisibleIndex - 1]?.idx;
+
+  const [isSectionValid, setIsSectionValid] = useState(false);
+
+  useEffect(() => {
+    form
+      .trigger(currentSection.fields.map((f) => f.id))
+      .then(setIsSectionValid);
+  }, [currentSection, form]);
+
+  useEffect(() => {
+    const subscription = form.watch((_, info) => {
+      const name = info.name as string;
+      if (currentSection.fields.some((f) => f.id === name)) {
+        form
+          .trigger(currentSection.fields.map((f) => f.id))
+          .then(setIsSectionValid);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form.watch, currentSection, form]);
+
   const onSubmit = (values: any) => {
     schema.sections.forEach((sec) =>
       runRules(filterRules(sec.rules, 'submit'), helpers)
@@ -101,26 +140,31 @@ export function FormRenderer() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <SectionRenderer section={currentSection} />
             <div className="flex justify-end gap-2 pt-4">
-              {currentSectionIndex > 0 && (
+              {!isFirstSection && (
                 <Button
                   type="button"
-                  onClick={() => setCurrentSection(currentSectionIndex - 1)}
+                  onClick={() =>
+                    prevSectionIndex !== undefined &&
+                    setCurrentSection(prevSectionIndex)
+                  }
                   variant="secondary"
                 >
                   Previous
                 </Button>
               )}
-              {currentSectionIndex < schema.sections.length - 1 && (
+              {!isLastSection && (
                 <Button
                   type="button"
-                  onClick={() => setCurrentSection(currentSectionIndex + 1)}
+                  onClick={() =>
+                    nextSectionIndex !== undefined &&
+                    setCurrentSection(nextSectionIndex)
+                  }
+                  disabled={!isSectionValid}
                 >
                   Next
                 </Button>
               )}
-              {currentSectionIndex === schema.sections.length - 1 && (
-                <Button type="submit">Save</Button>
-              )}
+              {isLastSection && <Button type="submit">Save</Button>}
             </div>
           </form>
           <FormDevTool />
