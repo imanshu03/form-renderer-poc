@@ -48,6 +48,7 @@ export function seedUI(schema: FormSchema): FormUIState {
         disabled: field.disabled || false,
         error: undefined,
         options: field.options?.source === 'STATIC' ? field.options.options : undefined,
+        disabledOptions: [], // Initialize with no disabled options
       };
     });
   });
@@ -296,6 +297,28 @@ export function applyActions(
           newSnapshot.ui.fields[action.target] = {
             ...newSnapshot.ui.fields[action.target],
             error: undefined,
+          };
+        }
+        break;
+
+      case 'DISABLE_OPTION':
+        if (newSnapshot.ui.fields[action.target] && action.optionValue) {
+          const currentDisabledOptions = newSnapshot.ui.fields[action.target].disabledOptions || [];
+          if (!currentDisabledOptions.includes(action.optionValue)) {
+            newSnapshot.ui.fields[action.target] = {
+              ...newSnapshot.ui.fields[action.target],
+              disabledOptions: [...currentDisabledOptions, action.optionValue],
+            };
+          }
+        }
+        break;
+
+      case 'ENABLE_OPTION':
+        if (newSnapshot.ui.fields[action.target] && action.optionValue) {
+          const currentDisabledOptions = newSnapshot.ui.fields[action.target].disabledOptions || [];
+          newSnapshot.ui.fields[action.target] = {
+            ...newSnapshot.ui.fields[action.target],
+            disabledOptions: currentDisabledOptions.filter(option => option !== action.optionValue),
           };
         }
         break;

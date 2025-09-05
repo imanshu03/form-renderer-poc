@@ -413,6 +413,10 @@ export const chargingPeriodSchema: FormSchema = {
             },
             {
               columns: 1,
+              items: [{ fieldId: "advice_types_warning", colSpan: 1 }],
+            },
+            {
+              columns: 1,
               items: [
                 { fieldId: "other_areas_identified_but_covered", colSpan: 1 },
               ],
@@ -443,6 +447,12 @@ export const chargingPeriodSchema: FormSchema = {
               ],
             },
             {
+              columns: 2,
+              items: [
+                { fieldId: "inheritance_tax_liability_amount", colSpan: 1 },
+              ],
+            },
+            {
               columns: 1,
               items: [
                 {
@@ -450,12 +460,6 @@ export const chargingPeriodSchema: FormSchema = {
                     "extra_details_for_no_concern_regarding_potential_tax_liability",
                   colSpan: 1,
                 },
-              ],
-            },
-            {
-              columns: 2,
-              items: [
-                { fieldId: "inheritance_tax_liability_amount", colSpan: 1 },
               ],
             },
           ],
@@ -549,7 +553,54 @@ export const chargingPeriodSchema: FormSchema = {
                     ],
                   },
                 },
+                {
+                  id: "advice_types_rule2",
+                  when: { in: ["long_term_care", { var: "advice_types" }] },
+                  then: {
+                    type: "SET_OPTIONS",
+                    target: "advice_types",
+                    value: [
+                      { label: "Investment Planning", value: "investment" },
+                      {
+                        label: "Long-Term Care Planning",
+                        value: "long_term_care",
+                      },
+                    ],
+                  },
+                  else: {
+                    type: "SET_OPTIONS",
+                    target: "advice_types",
+                    value: [
+                      { label: "Retirement Planning", value: "retirement" },
+                      { label: "Investment Planning", value: "investment" },
+                      {
+                        label: "Inheritance Tax Planning",
+                        value: "inheritance_tax",
+                      },
+                      { label: "Protection Planning", value: "protection" },
+                      { label: "Mortgage Planning", value: "mortgage" },
+                      {
+                        label: "Equity Release Planning",
+                        value: "equity_release",
+                      },
+                      {
+                        label: "Long-Term Care Planning",
+                        value: "long_term_care",
+                      },
+                    ],
+                  },
+                },
               ],
+            },
+            {
+              id: "advice_types_warning",
+              type: "info",
+              content:
+                "This letter should be used when the recommendation being made is being used to fund care fees. If the recommendation is for growth then the normal investment letter should be used.",
+              variant: "warning",
+              visibilityRule: {
+                in: ["long_term_care", { var: "advice_types" }],
+              },
             },
             {
               id: "other_areas_identified_but_covered",
@@ -565,7 +616,7 @@ export const chargingPeriodSchema: FormSchema = {
               },
               defaultValue: "no",
               visibilityRule: {
-                in: ["retirement", { var: "advice_types" }],
+                ">=": [{ count: { var: "advice_types" } }, 1],
               },
             },
             {
@@ -575,6 +626,7 @@ export const chargingPeriodSchema: FormSchema = {
               options: {
                 source: "STATIC",
                 options: [
+                  { label: "Retirement Planning", value: "retirement" },
                   { label: "Investment Planning", value: "investment" },
                   {
                     label: "Inheritance Tax Planning",
@@ -592,6 +644,120 @@ export const chargingPeriodSchema: FormSchema = {
                   },
                 ],
               },
+              rules: [
+                {
+                  id: "other_areas_made_aware_of_rule1",
+                  when: {
+                    in: ["retirement", { var: "advice_types" }],
+                  },
+                  then: {
+                    type: "DISABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "retirement",
+                  },
+                  else: {
+                    type: "ENABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "retirement",
+                  },
+                },
+                {
+                  id: "other_areas_made_aware_of_rule2",
+                  when: {
+                    in: ["investment", { var: "advice_types" }],
+                  },
+                  then: {
+                    type: "DISABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "investment",
+                  },
+                  else: {
+                    type: "ENABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "investment",
+                  },
+                },
+                {
+                  id: "other_areas_made_aware_of_rule3",
+                  when: {
+                    in: ["inheritance_tax", { var: "advice_types" }],
+                  },
+                  then: {
+                    type: "DISABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "inheritance_tax",
+                  },
+                  else: {
+                    type: "ENABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "inheritance_tax",
+                  },
+                },
+                {
+                  id: "other_areas_made_aware_of_rule4",
+                  when: {
+                    in: ["protection", { var: "advice_types" }],
+                  },
+                  then: {
+                    type: "DISABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "protection",
+                  },
+                  else: {
+                    type: "ENABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "protection",
+                  },
+                },
+                {
+                  id: "other_areas_made_aware_of_rule5",
+                  when: {
+                    in: ["mortgage", { var: "advice_types" }],
+                  },
+                  then: {
+                    type: "DISABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "mortgage",
+                  },
+                  else: {
+                    type: "ENABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "mortgage",
+                  },
+                },
+                {
+                  id: "other_areas_made_aware_of_rule6",
+                  when: {
+                    in: ["equity_release", { var: "advice_types" }],
+                  },
+                  then: {
+                    type: "DISABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "equity_release",
+                  },
+                  else: {
+                    type: "ENABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "equity_release",
+                  },
+                },
+                {
+                  id: "other_areas_made_aware_of_rule7",
+                  when: {
+                    in: ["long_term_care", { var: "advice_types" }],
+                  },
+                  then: {
+                    type: "DISABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "long_term_care",
+                  },
+                  else: {
+                    type: "ENABLE_OPTION",
+                    target: "other_areas_made_aware_of",
+                    optionValue: "long_term_care",
+                  },
+                },
+              ],
               visibilityRule: {
                 "==": [{ var: "other_areas_identified_but_covered" }, "yes"],
               },
@@ -655,15 +821,16 @@ export const chargingPeriodSchema: FormSchema = {
               id: "inheritance_tax_liability_amount",
               type: "number",
               label: "Enter value of tax liability (£)",
+              defaultValue: 0,
               visibilityRule: {
-                in: [{ var: "other_areas_made_aware_of" }, "inheritance_tax"],
+                in: ["inheritance_tax", { var: "other_areas_made_aware_of" }],
               },
               validators: [
                 {
                   type: "min",
-                  value: 0,
+                  value: 1,
                   message:
-                    "Inheritance Tax Liability Amount must be greater than 0",
+                    "Inheritance Tax Liability Amount must be greater than 1",
                 },
               ],
             },
@@ -673,13 +840,13 @@ export const chargingPeriodSchema: FormSchema = {
               label:
                 "Complete the Sentence: There is a potential Inheritance Tax liability of £${inheritance_tax_liability_amount} but this was not a concern because...",
               visibilityRule: {
-                in: [{ var: "other_areas_made_aware_of" }, "inheritance_tax"],
+                in: ["inheritance_tax", { var: "other_areas_made_aware_of" }],
               },
               rules: [
                 {
                   id: "inheritance_tax_liability_amount_rule",
                   when: {
-                    ">=": [{ var: "inheritance_tax_liability_amount" }, 0],
+                    ">=": [{ var: "inheritance_tax_liability_amount" }, 1],
                   },
                   then: {
                     type: "ENABLE",

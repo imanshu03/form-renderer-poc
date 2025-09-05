@@ -258,6 +258,8 @@ export function FieldRenderer({
                   {checkboxOptions.map((option) => {
                     const isChecked = cleanedValues.includes(option.value);
 
+                    const isOptionDisabled = fieldUI?.disabledOptions?.includes(String(option.value)) || false;
+                    
                     const handleOptionChange = (checked: boolean) => {
                       let newValues;
                       if (checked) {
@@ -273,12 +275,15 @@ export function FieldRenderer({
                     return (
                       <div
                         key={String(option.value)}
-                        className="flex items-center space-x-2"
+                        className={cn(
+                          "flex items-center space-x-2",
+                          isOptionDisabled && "opacity-50"
+                        )}
                       >
                         <Checkbox
                           checked={isChecked}
                           onCheckedChange={handleOptionChange}
-                          disabled={isDisabled}
+                          disabled={isDisabled || isOptionDisabled}
                           id={`${field.id}-${option.value}`}
                         />
                         <Label
@@ -333,23 +338,34 @@ export function FieldRenderer({
                 onValueChange={formField.onChange}
                 disabled={isDisabled}
               >
-                {options.map((option) => (
-                  <div
-                    key={String(option.value)}
-                    className="flex items-center space-x-2"
-                  >
-                    <RadioGroupItem
-                      value={String(option.value)}
-                      id={`${field.id}-${option.value}`}
-                    />
-                    <Label
-                      htmlFor={`${field.id}-${option.value}`}
-                      className="font-normal cursor-pointer"
+                {options.map((option) => {
+                  const isOptionDisabled = fieldUI?.disabledOptions?.includes(String(option.value)) || false;
+                  
+                  return (
+                    <div
+                      key={String(option.value)}
+                      className={cn(
+                        "flex items-center space-x-2",
+                        isOptionDisabled && "opacity-50"
+                      )}
                     >
-                      {option.label}
-                    </Label>
-                  </div>
-                ))}
+                      <RadioGroupItem
+                        value={String(option.value)}
+                        id={`${field.id}-${option.value}`}
+                        disabled={isOptionDisabled}
+                      />
+                      <Label
+                        htmlFor={`${field.id}-${option.value}`}
+                        className={cn(
+                          "font-normal cursor-pointer",
+                          isOptionDisabled && "cursor-not-allowed"
+                        )}
+                      >
+                        {option.label}
+                      </Label>
+                    </div>
+                  );
+                })}
               </RadioGroup>
             )}
           />
@@ -387,14 +403,22 @@ export function FieldRenderer({
                       No options available
                     </div>
                   ) : (
-                    options.map((option) => (
-                      <SelectItem
-                        key={String(option.value)}
-                        value={String(option.value)}
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))
+                    options.map((option) => {
+                      const isOptionDisabled = fieldUI?.disabledOptions?.includes(String(option.value)) || false;
+                      
+                      return (
+                        <SelectItem
+                          key={String(option.value)}
+                          value={String(option.value)}
+                          disabled={isOptionDisabled}
+                          className={cn(
+                            isOptionDisabled && "opacity-50 cursor-not-allowed"
+                          )}
+                        >
+                          {option.label}
+                        </SelectItem>
+                      );
+                    })
                   )}
                 </SelectContent>
               </Select>
@@ -446,18 +470,25 @@ export function FieldRenderer({
                             const isSelected = selectedValues.includes(
                               option.value
                             );
+                            const isOptionDisabled = fieldUI?.disabledOptions?.includes(String(option.value)) || false;
 
                             return (
                               <CommandItem
                                 key={String(option.value)}
                                 onSelect={() => {
-                                  const newValue = isSelected
-                                    ? selectedValues.filter(
-                                        (v: any) => v !== option.value
-                                      )
-                                    : [...selectedValues, option.value];
-                                  formField.onChange(newValue);
+                                  if (!isOptionDisabled) {
+                                    const newValue = isSelected
+                                      ? selectedValues.filter(
+                                          (v: any) => v !== option.value
+                                        )
+                                      : [...selectedValues, option.value];
+                                    formField.onChange(newValue);
+                                  }
                                 }}
+                                disabled={isOptionDisabled}
+                                className={cn(
+                                  isOptionDisabled && "opacity-50 cursor-not-allowed"
+                                )}
                               >
                                 <Check
                                   className={cn(

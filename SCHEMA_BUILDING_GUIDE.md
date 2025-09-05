@@ -586,6 +586,67 @@ Variables: var (field reference)
 }
 ```
 
+### Option-Level Control Rules
+
+You can dynamically disable or enable specific options within selection fields based on conditions:
+
+```json
+{
+  "id": "age",
+  "type": "number",
+  "label": "Age",
+  "validators": [{"type": "required"}]
+},
+{
+  "id": "services",
+  "type": "checkbox-group", 
+  "label": "Available Services",
+  "options": {
+    "source": "STATIC",
+    "options": [
+      {"label": "Investment Planning", "value": "investment"},
+      {"label": "Retirement Planning", "value": "retirement"},
+      {"label": "Insurance Products", "value": "insurance"},
+      {"label": "Alcohol Services", "value": "alcohol"},
+      {"label": "Gambling Services", "value": "gambling"}
+    ]
+  },
+  "rules": [
+    {
+      "id": "ageRestrictionRule",
+      "when": {
+        "<": [{"var": "age"}, 21]
+      },
+      "then": [
+        {"type": "DISABLE_OPTION", "target": "services", "optionValue": "alcohol"},
+        {"type": "DISABLE_OPTION", "target": "services", "optionValue": "gambling"}
+      ],
+      "else": [
+        {"type": "ENABLE_OPTION", "target": "services", "optionValue": "alcohol"},
+        {"type": "ENABLE_OPTION", "target": "services", "optionValue": "gambling"}
+      ]
+    }
+  ]
+}
+```
+
+**Option Control Actions:**
+- **DISABLE_OPTION**: Disables a specific option (grayed out, not selectable)
+- **ENABLE_OPTION**: Re-enables a previously disabled option
+- **optionValue**: The value of the option to disable/enable (must match exactly)
+
+**Supported Field Types:**
+- **select**: Dropdown options become disabled and unselectable
+- **radio**: Radio button options become disabled and unclickable  
+- **checkbox-group**: Checkbox options become disabled and unclickable
+- **multi-select**: Options in the dropdown become disabled and unselectable
+
+**Visual Behavior:**
+- Disabled options are visually dimmed (50% opacity)
+- Disabled options show "not-allowed" cursor on hover
+- Users cannot select or interact with disabled options
+- Previously selected disabled options remain selected but cannot be changed
+
 ## Navigation Configuration
 
 ### Single Page Form

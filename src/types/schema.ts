@@ -195,12 +195,15 @@ export type EngineActionType =
   | "SET_VALUE"
   | "SET_OPTIONS"
   | "SET_ERROR"
-  | "CLEAR_ERROR";
+  | "CLEAR_ERROR"
+  | "DISABLE_OPTION"
+  | "ENABLE_OPTION";
 
 export interface EngineAction {
   type: EngineActionType;
   target: string; // Field or section ID
   value?: any;
+  optionValue?: string; // For DISABLE_OPTION/ENABLE_OPTION actions
 }
 
 // Rule Definition
@@ -252,6 +255,7 @@ export interface FieldUIState {
   disabled: boolean;
   error?: string;
   options?: StaticOption[]; // Runtime options for dynamic selects
+  disabledOptions?: string[]; // Array of option values that should be disabled
 }
 
 export interface SectionUIState {
