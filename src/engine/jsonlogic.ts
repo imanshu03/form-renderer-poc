@@ -109,6 +109,8 @@ export function evaluate(
         return handleStartsWith(operands, context);
       case 'endsWith':
         return handleEndsWith(operands, context);
+      case 'count':
+        return handleCount(operands, context);
       
       // Conditional
       case 'if':
@@ -235,6 +237,31 @@ function handleEndsWith(operands: any, context: EvaluationContext): boolean {
   }
   
   return false;
+}
+
+function handleCount(operands: any, context: EvaluationContext): number {
+  const value = evaluate(operands, context);
+  
+  // Handle null/undefined
+  if (value === null || value === undefined) return 0;
+  
+  // Handle arrays
+  if (Array.isArray(value)) {
+    return value.length;
+  }
+  
+  // Handle strings
+  if (typeof value === 'string') {
+    return value.length;
+  }
+  
+  // Handle objects (count properties)
+  if (typeof value === 'object') {
+    return Object.keys(value).length;
+  }
+  
+  // For primitives, return 1 if truthy, 0 if falsy
+  return value ? 1 : 0;
 }
 
 function handleIf(operands: any, context: EvaluationContext): any {

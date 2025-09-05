@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { chargingPeriodSchema } from "./demo/chargingPeriodSchema";
 
 function App() {
   const [submittedData, setSubmittedData] = useState<any>(null);
@@ -48,22 +49,10 @@ function App() {
           </TabsList>
 
           <TabsContent value="form" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>{sampleSchema.meta?.title}</CardTitle>
-                <CardDescription>
-                  {sampleSchema.meta?.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <FormRenderer
-                  schema={sampleSchema}
-                  onSubmit={handleSubmit}
-                  // Optional: Override specific globals from schema
-                  // globals={{ country: "USA" }}
-                />
-              </CardContent>
-            </Card>
+            <FormRenderer
+              schema={chargingPeriodSchema}
+              onSubmit={handleSubmit}
+            />
           </TabsContent>
 
           <TabsContent value="schema">

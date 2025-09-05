@@ -6,6 +6,7 @@ import {
   GlobalContext,
   FieldBase,
   Section,
+  SubSection,
   Rule,
   StaticOption,
 } from '../types/schema';
@@ -29,7 +30,17 @@ export function seedUI(schema: FormSchema): FormUIState {
       disabled: section.disabled || false,
     };
 
-    // Initialize field UI states
+    // Initialize subsections UI state with prefixed keys
+    if (section.subsections) {
+      section.subsections.forEach(subsection => {
+        ui.sections[`subsection_${subsection.id}`] = {
+          visible: true,
+          disabled: subsection.disabled || false,
+        };
+      });
+    }
+
+    // Initialize field UI states (including subsection fields)
     const fields = getAllFieldsFromSection(section, schema);
     fields.forEach(field => {
       ui.fields[field.id] = {
@@ -56,7 +67,29 @@ export function initialValues(
   schema.sections.forEach(section => {
     const fields = getAllFieldsFromSection(section, schema);
     fields.forEach(field => {
-      if (field.defaultValue !== undefined) {
+      // Special handling for table fields with defaultValue logic
+      if (field.type === 'table') {
+        const hasValidDefaultValue = field.defaultValue !== undefined && 
+          field.defaultValue !== null && 
+          (Array.isArray(field.defaultValue) && field.defaultValue.length > 0);
+          
+        if (hasValidDefaultValue) {
+          values[field.id] = field.defaultValue;
+        } else if (field.defaultRows && field.defaultRows > 0 && field.columns) {
+          // Create default rows
+          const defaultRows = [];
+          for (let i = 0; i < field.defaultRows; i++) {
+            const row: Record<string, any> = {};
+            field.columns.forEach(col => {
+              row[col.id] = col.defaultValue || '';
+            });
+            defaultRows.push(row);
+          }
+          values[field.id] = defaultRows;
+        } else {
+          values[field.id] = [];
+        }
+      } else if (field.defaultValue !== undefined) {
         // Process template strings for globals
         let value = field.defaultValue;
         if (typeof value === 'string' && value.includes('${globals.')) {
@@ -74,10 +107,20 @@ export function initialValues(
             values[field.id] = false;
             break;
           case 'multi-select':
+          case 'checkbox-group':
             values[field.id] = [];
             break;
           case 'number':
             values[field.id] = null;
+            break;
+          case 'info':
+            // Info fields don't have values, skip them
+            break;
+          case 'heading':
+            // Heading fields don't have values, skip them
+            break;
+          case 'file':
+            values[field.id] = field.multiple ? [] : null;
             break;
           default:
             values[field.id] = '';
@@ -330,6 +373,17 @@ function getAllFieldsFromSection(section: Section, schema: FormSchema): FieldBas
     });
   }
 
+  // Collect all fields from subsections
+  if (section.subsections) {
+    section.subsections.forEach(subsection => {
+      if (subsection.fields) {
+        subsection.fields.forEach(field => {
+          fieldMap.set(field.id, field);
+        });
+      }
+    });
+  }
+
   // For rows-based layout, we need to maintain field definitions
   // In a real implementation, fields would be defined at the schema level
   // and referenced in rows. For now, we'll use the fields array.
@@ -341,6 +395,22 @@ function getAllFieldsFromSection(section: Section, schema: FormSchema): FieldBas
           fields.push(field);
         }
       });
+    });
+  }
+
+  // Handle subsection rows
+  if (section.subsections) {
+    section.subsections.forEach(subsection => {
+      if (subsection.rows) {
+        subsection.rows.forEach(row => {
+          row.items.forEach(item => {
+            const field = fieldMap.get(item.fieldId);
+            if (field && !fields.find(f => f.id === field.id)) {
+              fields.push(field);
+            }
+          });
+        });
+      }
     });
   }
 
@@ -363,9 +433,24 @@ export function buildPayload(
   stripDisabled = false
 ): Record<string, any> {
   const payload: Record<string, any> = {};
+  
+  // Build a map of field types for quick lookup
+  const fieldTypesMap = new Map<string, string>();
+  snapshot.schema.sections.forEach(section => {
+    const fields = getAllFieldsFromSection(section, snapshot.schema);
+    fields.forEach(field => {
+      fieldTypesMap.set(field.id, field.type);
+    });
+  });
 
   Object.keys(snapshot.values).forEach(fieldId => {
     const fieldUI = snapshot.ui.fields[fieldId];
+    const fieldType = fieldTypesMap.get(fieldId);
+    
+    // Skip info and heading fields - they are display only
+    if (fieldType === 'info' || fieldType === 'heading') {
+      return;
+    }
     
     // Skip hidden fields if configured
     if (stripHidden && fieldUI && !fieldUI.visible) {

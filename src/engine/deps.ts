@@ -1,4 +1,4 @@
-import { FormSchema, Rule, Section, FieldBase, DependencyGraph } from '../types/schema';
+import { FormSchema, Rule, Section, SubSection, FieldBase, DependencyGraph } from '../types/schema';
 import { extractVariablePaths } from './jsonlogic';
 
 /**
@@ -59,6 +59,40 @@ export function buildDependencyGraph(schema: FormSchema): DependencyGraph {
           byField[fieldId] = [];
         }
         byField[fieldId].push(ruleId);
+      });
+    }
+    
+    // Process subsection visibility rules
+    if (section.subsections) {
+      section.subsections.forEach(subsection => {
+        if (subsection.visibilityRule) {
+          const ruleId = `subsection_${subsection.id}_visibility`;
+          const rule: Rule = {
+            id: ruleId,
+            when: subsection.visibilityRule,
+            then: [
+              { type: 'SHOW_SECTION', target: `subsection_${subsection.id}`, value: true }
+            ],
+            else: [
+              { type: 'HIDE_SECTION', target: `subsection_${subsection.id}`, value: false }
+            ]
+          };
+          
+          const reads = extractVariablePaths(rule.when);
+          rules[ruleId] = { rule, reads };
+          
+          reads.forEach(fieldPath => {
+            // Skip globals and params paths for field dependency tracking
+            if (fieldPath.startsWith('globals.') || fieldPath.startsWith('params.')) {
+              return;
+            }
+            const fieldId = fieldPath.split('.').pop() || fieldPath;
+            if (!byField[fieldId]) {
+              byField[fieldId] = [];
+            }
+            byField[fieldId].push(ruleId);
+          });
+        }
       });
     }
     
@@ -128,10 +162,18 @@ export function buildDependencyGraph(schema: FormSchema): DependencyGraph {
 function getFieldsFromSection(section: Section): FieldBase[] {
   const fields: FieldBase[] = [];
   
-  // Always return the fields array from the section
-  // The rows just define layout, the fields array contains the definitions
+  // Add fields directly from the section
   if (section.fields) {
-    return section.fields;
+    fields.push(...section.fields);
+  }
+  
+  // Add fields from subsections
+  if (section.subsections) {
+    section.subsections.forEach(subsection => {
+      if (subsection.fields) {
+        fields.push(...subsection.fields);
+      }
+    });
   }
   
   return fields;

@@ -20,6 +20,10 @@ export const sampleSchema: FormSchema = {
       description: "Basic personal details",
       rows: [
         {
+          columns: 1,
+          items: [{ fieldId: "welcomeInfo", colSpan: 1 }],
+        },
+        {
           columns: 2,
           gap: 4,
           items: [
@@ -42,6 +46,13 @@ export const sampleSchema: FormSchema = {
       ],
       fields: [
         {
+          id: "welcomeInfo",
+          type: "info",
+          label: "Welcome to Acme Corp",
+          content: "Please fill out your personal information below. This information will be used for your employee profile and official documentation. All fields marked with an asterisk (*) are required.",
+          variant: "info",
+        },
+        {
           id: "firstName",
           type: "text",
           label: "First Name",
@@ -54,6 +65,10 @@ export const sampleSchema: FormSchema = {
               message: "Must be at least 2 characters",
             },
           ],
+          tooltip: {
+            helpfulHint: "Enter your legal first name",
+            helpText: "This should match the name on your government-issued ID. Middle names should not be included here."
+          },
         },
         {
           id: "lastName",
@@ -72,6 +87,9 @@ export const sampleSchema: FormSchema = {
             { type: "required", message: "Email is required" },
             { type: "email", message: "Please enter a valid email" },
           ],
+          tooltip: {
+            helpfulHint: "Use your work email address if you have one"
+          },
         },
         {
           id: "age",
@@ -193,6 +211,10 @@ export const sampleSchema: FormSchema = {
       },
       rows: [
         {
+          columns: 1,
+          items: [{ fieldId: "identificationInfo", colSpan: 1 }],
+        },
+        {
           columns: 2,
           gap: 4,
           items: [{ fieldId: "hasSSN", colSpan: 2 }],
@@ -207,6 +229,13 @@ export const sampleSchema: FormSchema = {
         },
       ],
       fields: [
+        {
+          id: "identificationInfo",
+          type: "info",
+          label: "Important Notice",
+          content: "This section requires government-issued identification information. Please ensure all information is accurate and matches your official documents. Providing false information may result in delays in your onboarding process.",
+          variant: "warning",
+        },
         {
           id: "hasSSN",
           type: "checkbox",
@@ -361,6 +390,208 @@ export const sampleSchema: FormSchema = {
         },
       ],
     },
+    {
+      id: "preferences_settings",
+      label: "Preferences & Settings",
+      description: "Configure your workplace preferences",
+      // This section will only contain subsections (no direct fields)
+      subsections: [
+        {
+          id: "workspace",
+          label: "Workspace Preferences",
+          description: "Customize your work environment",
+          defaultOpen: true, // This accordion will be open by default
+          rows: [
+            {
+              columns: 2,
+              gap: 4,
+              items: [
+                { fieldId: "preferredOS", colSpan: 1 },
+                { fieldId: "monitorSetup", colSpan: 1 },
+              ],
+            },
+            {
+              columns: 1,
+              items: [{ fieldId: "workspaceNotes", colSpan: 1 }],
+            },
+          ],
+          fields: [
+            {
+              id: "preferredOS",
+              type: "select",
+              label: "Preferred Operating System",
+              placeholder: "Select OS",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "macOS", value: "macos" },
+                  { label: "Windows", value: "windows" },
+                  { label: "Linux", value: "linux" },
+                ],
+              },
+            },
+            {
+              id: "monitorSetup",
+              type: "select",
+              label: "Monitor Setup",
+              placeholder: "Select setup",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Single Monitor", value: "single" },
+                  { label: "Dual Monitor", value: "dual" },
+                  { label: "Triple Monitor", value: "triple" },
+                  { label: "Ultrawide", value: "ultrawide" },
+                ],
+              },
+            },
+            {
+              id: "workspaceNotes",
+              type: "textarea",
+              label: "Workspace Notes",
+              placeholder: "Any specific workspace requirements...",
+              helpText: "Optional: Ergonomic needs, desk setup, etc.",
+            },
+          ],
+        },
+        {
+          id: "communication",
+          label: "Communication Preferences",
+          description: "How you prefer to communicate and receive updates",
+          defaultOpen: false, // This accordion will be closed by default
+          rows: [
+            {
+              columns: 1,
+              gap: 4,
+              items: [
+                { fieldId: "preferredCommunication", colSpan: 1 },
+                { fieldId: "meetingPreference", colSpan: 1 },
+                { fieldId: "notificationSettings", colSpan: 1 },
+              ],
+            },
+          ],
+          fields: [
+            {
+              id: "preferredCommunication",
+              type: "multi-select",
+              label: "Preferred Communication Channels",
+              placeholder: "Select channels",
+              helpText: "Select all that apply",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Slack", value: "slack" },
+                  { label: "Email", value: "email" },
+                  { label: "Microsoft Teams", value: "teams" },
+                  { label: "Phone", value: "phone" },
+                  { label: "Video Call", value: "video" },
+                ],
+              },
+            },
+            {
+              id: "meetingPreference",
+              type: "select",
+              label: "Meeting Preference",
+              placeholder: "Select preference",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "In-person when possible", value: "in_person" },
+                  { label: "Video calls preferred", value: "video_preferred" },
+                  { label: "Audio calls preferred", value: "audio_preferred" },
+                  { label: "Async communication preferred", value: "async" },
+                ],
+              },
+            },
+            {
+              id: "notificationSettings",
+              type: "select",
+              label: "Notification Frequency",
+              placeholder: "Select frequency",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Real-time", value: "realtime" },
+                  { label: "Hourly digest", value: "hourly" },
+                  { label: "Daily digest", value: "daily" },
+                  { label: "Weekly digest", value: "weekly" },
+                ],
+              },
+            },
+          ],
+        },
+        {
+          id: "benefits",
+          label: "Benefits & Perks",
+          description: "Select your preferred benefits and company perks",
+          defaultOpen: false,
+          rows: [
+            {
+              columns: 2,
+              gap: 4,
+              items: [
+                { fieldId: "healthPlan", colSpan: 1 },
+                { fieldId: "retirementPlan", colSpan: 1 },
+              ],
+            },
+            {
+              columns: 1,
+              items: [{ fieldId: "additionalBenefits", colSpan: 1 }],
+            },
+          ],
+          fields: [
+            {
+              id: "healthPlan",
+              type: "select",
+              label: "Health Insurance Plan",
+              placeholder: "Select plan",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Basic Plan", value: "basic" },
+                  { label: "Standard Plan", value: "standard" },
+                  { label: "Premium Plan", value: "premium" },
+                  { label: "Family Plan", value: "family" },
+                ],
+              },
+            },
+            {
+              id: "retirementPlan",
+              type: "select",
+              label: "Retirement Plan",
+              placeholder: "Select plan",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "401(k) - 3% Match", value: "401k_3" },
+                  { label: "401(k) - 6% Match", value: "401k_6" },
+                  { label: "Roth IRA", value: "roth_ira" },
+                  { label: "No retirement plan", value: "none" },
+                ],
+              },
+            },
+            {
+              id: "additionalBenefits",
+              type: "multi-select",
+              label: "Additional Benefits",
+              placeholder: "Select benefits",
+              helpText: "Select all that apply",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Gym Membership", value: "gym" },
+                  { label: "Transit Pass", value: "transit" },
+                  { label: "Learning Budget", value: "learning" },
+                  { label: "Flexible PTO", value: "flexible_pto" },
+                  { label: "Remote Work Stipend", value: "remote_stipend" },
+                  { label: "Mental Health Support", value: "mental_health" },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
   formRules: [],
   navigation: {
@@ -368,6 +599,7 @@ export const sampleSchema: FormSchema = {
     validateOnNext: true,
     allowSkip: true,
     allowReset: true, // Enable reset functionality
+    allowSaveOnAll: true, // Allow saving even with validation errors
   },
   submission: {
     stripHiddenFields: true,

@@ -43,6 +43,7 @@ export function zodFromField(
       break;
 
     case "multi-select":
+    case "checkbox-group":
       schema = z.array(z.union([z.string(), z.number()]));
       break;
 
@@ -54,6 +55,18 @@ export function zodFromField(
 
     case "file":
       schema = z.any(); // File handling varies
+      break;
+
+    case "info":
+      schema = z.any().optional(); // Info fields are informational only
+      break;
+
+    case "heading":
+      schema = z.any().optional(); // Heading fields are display only
+      break;
+
+    case "table":
+      schema = z.array(z.record(z.any())); // Array of row objects
       break;
 
     default:
@@ -99,7 +112,7 @@ function applyValidator(
           message: message || "This field is required",
         });
       }
-      if (fieldType === "multi-select") {
+      if (fieldType === "multi-select" || fieldType === "checkbox-group") {
         return (schema as z.ZodArray<any>).min(
           1,
           message || "Please select at least one option"
@@ -173,7 +186,7 @@ function applyValidator(
 
     case "minLength":
       if (validator.value !== undefined) {
-        if (fieldType === "multi-select") {
+        if (fieldType === "multi-select" || fieldType === "checkbox-group") {
           return (schema as z.ZodArray<any>).min(validator.value, message);
         }
         return (schema as z.ZodString).min(validator.value, message);
@@ -182,7 +195,7 @@ function applyValidator(
 
     case "maxLength":
       if (validator.value !== undefined) {
-        if (fieldType === "multi-select") {
+        if (fieldType === "multi-select" || fieldType === "checkbox-group") {
           return (schema as z.ZodArray<any>).max(validator.value, message);
         }
         return (schema as z.ZodString).max(validator.value, message);
