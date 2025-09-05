@@ -60,7 +60,7 @@ export const chargingPeriodSchema: FormSchema = {
         {
           id: "basic_client_details",
           label: "Basic Client Details",
-          defaultOpen: true,
+          defaultOpen: false,
           rows: [
             { columns: 1, items: [{ fieldId: "client_type", colSpan: 1 }] },
             {
@@ -462,6 +462,59 @@ export const chargingPeriodSchema: FormSchema = {
                 },
               ],
             },
+            {
+              columns: 1,
+              items: [{ fieldId: "online_kiid_kid_provided", colSpan: 1 }],
+            },
+            {
+              columns: 1,
+              items: [
+                {
+                  fieldId: "ran_income_sustainability_calculator",
+                  colSpan: 1,
+                },
+              ],
+            },
+            {
+              columns: 1,
+              items: [
+                {
+                  fieldId: "income_sustainability_run_type",
+                  colSpan: 1,
+                },
+              ],
+            },
+            {
+              columns: 1,
+              items: [
+                {
+                  fieldId: "mortgage_form_completed_with_client_presence",
+                  colSpan: 1,
+                },
+              ],
+            },
+            {
+              columns: 2,
+              items: [
+                {
+                  fieldId: "mortgage_fee_charged_to_client",
+                  colSpan: 1,
+                },
+                {
+                  fieldId: "mortgage_fee_charged_to_client_amount",
+                  colSpan: 1,
+                },
+              ],
+            },
+            {
+              columns: 1,
+              items: [
+                {
+                  fieldId: "mortgage_extra_reasoning",
+                  colSpan: 1,
+                },
+              ],
+            },
           ],
           fields: [
             {
@@ -530,32 +583,12 @@ export const chargingPeriodSchema: FormSchema = {
                       { label: "Retirement Planning", value: "retirement" },
                     ],
                   },
-                  else: {
-                    type: "SET_OPTIONS",
-                    target: "advice_types",
-                    value: [
-                      { label: "Retirement Planning", value: "retirement" },
-                      { label: "Investment Planning", value: "investment" },
-                      {
-                        label: "Inheritance Tax Planning",
-                        value: "inheritance_tax",
-                      },
-                      { label: "Protection Planning", value: "protection" },
-                      { label: "Mortgage Planning", value: "mortgage" },
-                      {
-                        label: "Equity Release Planning",
-                        value: "equity_release",
-                      },
-                      {
-                        label: "Long-Term Care Planning",
-                        value: "long_term_care",
-                      },
-                    ],
-                  },
                 },
                 {
                   id: "advice_types_rule2",
-                  when: { in: ["long_term_care", { var: "advice_types" }] },
+                  when: {
+                    in: ["long_term_care", { var: "advice_types" }],
+                  },
                   then: {
                     type: "SET_OPTIONS",
                     target: "advice_types",
@@ -567,7 +600,24 @@ export const chargingPeriodSchema: FormSchema = {
                       },
                     ],
                   },
-                  else: {
+                },
+                {
+                  id: "advice_types_rule3",
+                  when: {
+                    and: [
+                      {
+                        not: {
+                          in: ["retirement", { var: "advice_types" }],
+                        },
+                      },
+                      {
+                        not: {
+                          in: ["long_term_care", { var: "advice_types" }],
+                        },
+                      },
+                    ],
+                  },
+                  then: {
                     type: "SET_OPTIONS",
                     target: "advice_types",
                     value: [
@@ -860,6 +910,219 @@ export const chargingPeriodSchema: FormSchema = {
                   },
                 },
               ],
+            },
+            {
+              id: "online_kiid_kid_provided",
+              type: "radio",
+              label: "Did you provide an online KIID or KID?",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Yes", value: "yes" },
+                  { label: "No", value: "no" },
+                ],
+              },
+              defaultValue: "no",
+              visibilityRule: {
+                or: [
+                  {
+                    in: ["investment", { var: "advice_types" }],
+                  },
+                  {
+                    in: ["inheritance_tax", { var: "advice_types" }],
+                  },
+                ],
+              },
+            },
+            {
+              id: "ran_income_sustainability_calculator",
+              type: "radio",
+              label:
+                "Have you run an Income Sustainability Calculator or Proprietary Cashflow Analysis?",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Yes", value: "yes" },
+                  { label: "No", value: "no" },
+                ],
+              },
+              visibilityRule: {
+                in: ["investment", { var: "advice_types" }],
+              },
+              helpText:
+                "Please see page 317 of the Advice Framework for the scenarios in which a cashflow analysis is required.",
+              validators: [
+                { type: "required", message: "Please select an option" },
+              ],
+            },
+            {
+              id: "income_sustainability_run_type",
+              type: "select",
+              label: "Which type has been run?",
+              options: {
+                source: "STATIC",
+                options: [
+                  {
+                    label: "Income Sustainability Calculator",
+                    value: "income_sustainability_calculator",
+                  },
+                  {
+                    label: "Proprietary Cashflow Analysis",
+                    value: "proprietary_cashflow_analysis",
+                  },
+                  { label: "Both", value: "both" },
+                ],
+              },
+              visibilityRule: {
+                "==": [{ var: "ran_income_sustainability_calculator" }, "yes"],
+              },
+            },
+            {
+              id: "mortgage_form_completed_with_client_presence",
+              type: "radio",
+              label:
+                "Was the application form for the mortgage completed with the client present?",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Yes", value: "yes" },
+                  { label: "No", value: "no" },
+                ],
+              },
+              visibilityRule: {
+                in: ["mortgage", { var: "advice_types" }],
+              },
+              defaultValue: "no",
+            },
+            {
+              id: "mortgage_fee_charged_to_client",
+              type: "radio",
+              label: "Have you charged the client a fee?",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Yes", value: "yes" },
+                  { label: "No", value: "no" },
+                ],
+              },
+              visibilityRule: {
+                in: ["mortgage", { var: "advice_types" }],
+              },
+              defaultValue: "no",
+            },
+            {
+              id: "mortgage_fee_charged_to_client_amount",
+              type: "number",
+              label: "Enter value of fee charged to client (£)",
+              defaultValue: 0,
+              visibilityRule: {
+                "==": [{ var: "mortgage_fee_charged_to_client" }, "yes"],
+              },
+            },
+            {
+              id: "mortgage_extra_reasoning",
+              type: "textarea",
+              label:
+                "Complete the Sentence: As agreed, I have charged a fee of £${mortgage_fee_charged_to_client_amount}, this is in respect of...",
+              visibilityRule: {
+                "==": [{ var: "mortgage_fee_charged_to_client" }, "yes"],
+              },
+            },
+          ],
+        },
+        {
+          id: "further_client_details",
+          label: "Further Client Details",
+          rows: [
+            {
+              columns: 2,
+              items: [
+                {
+                  fieldId: "power_of_attorney_present",
+                  colSpan: 1,
+                },
+                {
+                  fieldId: "advising_power_of_attorney",
+                  colSpan: 1,
+                },
+              ],
+            },
+            {
+              columns: 1,
+              items: [
+                {
+                  fieldId: "upto_date_will",
+                  colSpan: 1,
+                },
+              ],
+            },
+            {
+              columns: 1,
+              items: [
+                {
+                  fieldId: "upto_date_will_alert",
+                  colSpan: 1,
+                },
+              ],
+            },
+          ],
+          fields: [
+            {
+              id: "power_of_attorney_present",
+              type: "radio",
+              label: "Is there a Power of Attorney in place?",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Yes", value: "yes" },
+                  { label: "No", value: "no" },
+                ],
+              },
+              defaultValue: "no",
+              visibilityRule: {
+                in: ["long_term_care", { var: "advice_types" }],
+              },
+              validators: [
+                { type: "required", message: "Please select an option" },
+              ],
+            },
+            {
+              id: "advising_power_of_attorney",
+              type: "radio",
+              label: "Are we giving advice to the Power of Attorney?",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Yes", value: "yes" },
+                  { label: "No", value: "no" },
+                ],
+              },
+              defaultValue: "no",
+              visibilityRule: {
+                "==": [{ var: "power_of_attorney_present" }, "yes"],
+              },
+            },
+            {
+              id: "upto_date_will",
+              type: "radio",
+              label: "Does the client have an up-to-date Will?",
+              options: {
+                source: "STATIC",
+                options: [
+                  { label: "Yes", value: "yes" },
+                  { label: "No", value: "no" },
+                ],
+              },
+            },
+            {
+              id: "upto_date_will_alert",
+              type: "info",
+              content:
+                "You do not have an up-to-date Will so I recommended you seek legal advice to review your Will arrangements.",
+              variant: "warning",
+              visibilityRule: {
+                "==": [{ var: "upto_date_will" }, "no"],
+              },
             },
           ],
         },

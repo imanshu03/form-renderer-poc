@@ -87,7 +87,7 @@ export function FieldRenderer({
   const fieldUI = snapshot.ui.fields[field.id];
   const formValues = watch();
 
-  // Resolve placeholders in field labels, placeholders, and helpText using current form values
+  // Resolve placeholders in field labels, placeholders, helpText, and content using current form values
   // @ts-ignore
   const resolvedField = useMemo(() => {
     const context = {
@@ -106,6 +106,9 @@ export function FieldRenderer({
       helpText: field.helpText
         ? resolvePlaceholders(field.helpText, context)
         : field.helpText,
+      content: field.content
+        ? resolvePlaceholders(field.content, context)
+        : field.content,
     };
   }, [field, formValues, snapshot.globals]);
 
@@ -599,10 +602,10 @@ export function FieldRenderer({
               {field.markdown ? (
                 <div
                   className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: field.content || "" }}
+                  dangerouslySetInnerHTML={{ __html: resolvedField.content || "" }}
                 />
               ) : (
-                <span>{field.content}</span>
+                <span>{resolvedField.content}</span>
               )}
             </AlertDescription>
           </Alert>
